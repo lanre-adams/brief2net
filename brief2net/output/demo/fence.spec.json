@@ -1,0 +1,148 @@
+{
+  "name": "fence",
+  "recipe": "fence",
+  "brief": "A low wooden fence with 20 posts along a path.",
+  "nodes": [
+    {
+      "name": "post",
+      "type": "box",
+      "parms": {
+        "sizex": 0.15,
+        "sizez": 0.15
+      },
+      "exprs": {
+        "sizey": "ch(\"../post_height\")",
+        "ty": "ch(\"../post_height\")*0.5"
+      },
+      "note": "One fence post, sitting on the ground"
+    },
+    {
+      "name": "repeat_posts",
+      "type": "copyxform",
+      "parms": {},
+      "exprs": {
+        "ncy": "ch(\"../post_count\")",
+        "tx": "ch(\"../post_spacing\")"
+      },
+      "note": "Repeats the post along X"
+    },
+    {
+      "name": "rail",
+      "type": "box",
+      "parms": {
+        "sizey": 0.08,
+        "sizez": 0.06
+      },
+      "exprs": {
+        "sizex": "(ch(\"../post_count\")*ch(\"../post_spacing\"))-ch(\"../post_spacing\")",
+        "tx": "((ch(\"../post_count\")*ch(\"../post_spacing\"))-ch(\"../post_spacing\"))*0.5",
+        "ty": "ch(\"../post_height\")*0.8"
+      },
+      "note": "Top rail; length follows count x spacing"
+    },
+    {
+      "name": "lower_rail",
+      "type": "copyxform",
+      "parms": {
+        "ncy": 2
+      },
+      "exprs": {
+        "ty": "-ch(\"../post_height\")*0.45"
+      },
+      "note": "Duplicates the rail lower down"
+    },
+    {
+      "name": "combine",
+      "type": "merge",
+      "parms": {},
+      "exprs": {},
+      "note": "Posts + rails together"
+    },
+    {
+      "name": "OUT",
+      "type": "null",
+      "parms": {},
+      "exprs": {},
+      "note": "Final output \u2014 display flag lives here"
+    }
+  ],
+  "connections": [
+    {
+      "src": "post",
+      "dst": "repeat_posts",
+      "dst_input": 0
+    },
+    {
+      "src": "rail",
+      "dst": "lower_rail",
+      "dst_input": 0
+    },
+    {
+      "src": "repeat_posts",
+      "dst": "combine",
+      "dst_input": 0
+    },
+    {
+      "src": "lower_rail",
+      "dst": "combine",
+      "dst_input": 1
+    },
+    {
+      "src": "combine",
+      "dst": "OUT",
+      "dst_input": 0
+    }
+  ],
+  "controls": [
+    {
+      "name": "post_count",
+      "label": "Posts",
+      "kind": "int",
+      "default": 20,
+      "min": 2,
+      "max": 500,
+      "drives": [
+        "repeat_posts.ncy",
+        "rail.sizex",
+        "rail.tx"
+      ],
+      "help": ""
+    },
+    {
+      "name": "post_spacing",
+      "label": "Post Spacing",
+      "kind": "float",
+      "default": 2.0,
+      "min": 0.3,
+      "max": 10,
+      "drives": [
+        "repeat_posts.tx",
+        "rail.sizex",
+        "rail.tx"
+      ],
+      "help": ""
+    },
+    {
+      "name": "post_height",
+      "label": "Post Height",
+      "kind": "float",
+      "default": 0.72,
+      "min": 0.3,
+      "max": 5,
+      "drives": [
+        "post.sizey",
+        "post.ty",
+        "rail.ty",
+        "lower_rail.ty"
+      ],
+      "help": ""
+    }
+  ],
+  "output": "OUT",
+  "assumptions": [
+    "Read '20 posts' as post_count = 20.",
+    "'low' -> post_height x0.6 (now 0.72).",
+    "Left at recipe defaults (brief did not say): post_spacing.",
+    "Recipe chosen: 'Fence / railing' (keyword score 6; confidence high)."
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "name": "scatter_on_terrain",
+  "recipe": "scatter_on_terrain",
+  "brief": "A dense field of jagged rocks scattered across hilly terrain, about 800 rocks, 150 metres wide.",
+  "nodes": [
+    {
+      "name": "terrain_grid",
+      "type": "grid",
+      "parms": {
+        "rows": 120,
+        "cols": 120
+      },
+      "exprs": {
+        "sizex": "ch(\"../terrain_size\")",
+        "sizey": "ch(\"../terrain_size\")"
+      },
+      "note": "Ground plane; size follows the Terrain Size control"
+    },
+    {
+      "name": "terrain_noise",
+      "type": "mountain::2.0",
+      "parms": {
+        "elementsize": 8.0
+      },
+      "exprs": {
+        "height": "ch(\"../terrain_height\")"
+      },
+      "note": "Rolling hills via fractal noise"
+    },
+    {
+      "name": "scatter_pts",
+      "type": "scatter::2.0",
+      "parms": {},
+      "exprs": {
+        "npts": "ch(\"../instance_count\")",
+        "seed": "ch(\"../seed\")"
+      },
+      "note": "Where the objects will sit"
+    },
+    {
+      "name": "scale_and_spin",
+      "type": "attribwrangle",
+      "parms": {
+        "class": 2,
+        "snippet": "// Random size and rotation per point (edit freely)\nfloat r = rand(@ptnum + ch(\"../seed\"));\n@pscale = fit01(r, ch(\"../min_scale\"), ch(\"../max_scale\"));\nfloat a = rand(@ptnum * 7.13) * 2 * PI;\np@orient = quaternion(a, {0,1,0});\n"
+      },
+      "exprs": {},
+      "note": "Readable VEX: per-point scale between Min/Max Scale, random yaw"
+    },
+    {
+      "name": "piece_base",
+      "type": "sphere",
+      "parms": {
+        "type": 2,
+        "freq": 3
+      },
+      "exprs": {},
+      "note": "Low-poly sphere as the base for each scattered piece"
+    },
+    {
+      "name": "piece_rough",
+      "type": "mountain::2.0",
+      "parms": {
+        "elementsize": 0.4
+      },
+      "exprs": {
+        "height": "ch(\"../piece_roughness\")"
+      },
+      "note": "Breaks up the sphere so pieces look like rocks"
+    },
+    {
+      "name": "place_pieces",
+      "type": "copytopoints::2.0",
+      "parms": {
+        "pack": 1
+      },
+      "exprs": {},
+      "note": "Copies one piece onto every scattered point (packed for speed)"
+    },
+    {
+      "name": "combine",
+      "type": "merge",
+      "parms": {},
+      "exprs": {},
+      "note": "Terrain + pieces together"
+    },
+    {
+      "name": "OUT",
+      "type": "null",
+      "parms": {},
+      "exprs": {},
+      "note": "Final output \u2014 display flag lives here"
+    }
+  ],
+  "connections": [
+    {
+      "src": "terrain_grid",
+      "dst": "terrain_noise",
+      "dst_input": 0
+    },
+    {
+      "src": "terrain_noise",
+      "dst": "scatter_pts",
+      "dst_input": 0
+    },
+    {
+      "src": "scatter_pts",
+      "dst": "scale_and_spin",
+      "dst_input": 0
+    },
+    {
+      "src": "piece_base",
+      "dst": "piece_rough",
+      "dst_input": 0
+    },
+    {
+      "src": "piece_rough",
+      "dst": "place_pieces",
+      "dst_input": 0
+    },
+    {
+      "src": "scale_and_spin",
+      "dst": "place_pieces",
+      "dst_input": 1
+    },
+    {
+      "src": "terrain_noise",
+      "dst": "combine",
+      "dst_input": 0
+    },
+    {
+      "src": "place_pieces",
+      "dst": "combine",
+      "dst_input": 1
+    },
+    {
+      "src": "combine",
+      "dst": "OUT",
+      "dst_input": 0
+    }
+  ],
+  "controls": [
+    {
+      "name": "terrain_size",
+      "label": "Terrain Size",
+      "kind": "float",
+      "default": 150.0,
+      "min": 5,
+      "max": 500,
+      "drives": [
+        "terrain_grid.sizex",
+        "terrain_grid.sizey"
+      ],
+      "help": "Width of the ground in metres"
+    },
+    {
+      "name": "terrain_height",
+      "label": "Hill Height",
+      "kind": "float",
+      "default": 12.0,
+      "min": 0,
+      "max": 50,
+      "drives": [
+        "terrain_noise.height"
+      ],
+      "help": "How tall the hills are"
+    },
+    {
+      "name": "instance_count",
+      "label": "Object Count",
+      "kind": "int",
+      "default": 800,
+      "min": 1,
+      "max": 20000,
+      "drives": [
+        "scatter_pts.npts"
+      ],
+      "help": "How many objects are scattered"
+    },
+    {
+      "name": "seed",
+      "label": "Random Seed",
+      "kind": "float",
+      "default": 1,
+      "min": 0,
+      "max": 1000,
+      "drives": [
+        "scatter_pts.seed"
+      ],
+      "help": "Change for a different arrangement"
+    },
+    {
+      "name": "min_scale",
+      "label": "Min Scale",
+      "kind": "float",
+      "default": 0.3,
+      "min": 0.01,
+      "max": 10,
+      "drives": [],
+      "help": "Smallest object size (read inside the wrangle)"
+    },
+    {
+      "name": "max_scale",
+      "label": "Max Scale",
+      "kind": "float",
+      "default": 1.2,
+      "min": 0.01,
+      "max": 10,
+      "drives": [],
+      "help": "Largest object size (read inside the wrangle)"
+    },
+    {
+      "name": "piece_roughness",
+      "label": "Roughness",
+      "kind": "float",
+      "default": 0.7,
+      "min": 0,
+      "max": 2,
+      "drives": [
+        "piece_rough.height"
+      ],
+      "help": "How lumpy each object is"
+    }
+  ],
+  "output": "OUT",
+  "assumptions": [
+    "Read '800 rocks' as instance_count = 800.",
+    "Read '150 metres' as terrain_size = 150.",
+    "'hilly' -> terrain_height x2.0 (now 12).",
+    "'jagged' -> piece_roughness x2.0 (now 0.7).",
+    "Left at recipe defaults (brief did not say): seed, min_scale, max_scale.",
+    "Recipe chosen: 'Scatter objects on terrain' (keyword score 10; confidence high)."
+  ]
+}

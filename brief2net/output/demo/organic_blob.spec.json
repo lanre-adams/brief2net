@@ -1,0 +1,178 @@
+{
+  "name": "organic_blob",
+  "recipe": "organic_blob",
+  "brief": "A large craggy rust asteroid for a space shot.",
+  "nodes": [
+    {
+      "name": "base",
+      "type": "sphere",
+      "parms": {
+        "type": 2,
+        "freq": 6
+      },
+      "exprs": {
+        "radx": "ch(\"../radius\")",
+        "rady": "ch(\"../radius\")",
+        "radz": "ch(\"../radius\")"
+      },
+      "note": "Starting sphere; size follows Radius"
+    },
+    {
+      "name": "smooth",
+      "type": "subdivide",
+      "parms": {},
+      "exprs": {
+        "iterations": "ch(\"../detail\")"
+      },
+      "note": "Adds resolution so the noise has something to push"
+    },
+    {
+      "name": "surface_noise",
+      "type": "mountain::2.0",
+      "parms": {},
+      "exprs": {
+        "height": "ch(\"../roughness\")",
+        "elementsize": "ch(\"../feature_size\")"
+      },
+      "note": "Lumps and craters via fractal noise"
+    },
+    {
+      "name": "tint",
+      "type": "color",
+      "parms": {
+        "class": 1
+      },
+      "exprs": {
+        "colorr": "ch(\"../tint_r\")",
+        "colorg": "ch(\"../tint_g\")",
+        "colorb": "ch(\"../tint_b\")"
+      },
+      "note": "Base colour for look-dev"
+    },
+    {
+      "name": "OUT",
+      "type": "null",
+      "parms": {},
+      "exprs": {},
+      "note": "Final output \u2014 display flag lives here"
+    }
+  ],
+  "connections": [
+    {
+      "src": "base",
+      "dst": "smooth",
+      "dst_input": 0
+    },
+    {
+      "src": "smooth",
+      "dst": "surface_noise",
+      "dst_input": 0
+    },
+    {
+      "src": "surface_noise",
+      "dst": "tint",
+      "dst_input": 0
+    },
+    {
+      "src": "tint",
+      "dst": "OUT",
+      "dst_input": 0
+    }
+  ],
+  "controls": [
+    {
+      "name": "radius",
+      "label": "Radius",
+      "kind": "float",
+      "default": 5.0,
+      "min": 0.1,
+      "max": 100,
+      "drives": [
+        "base.radx",
+        "base.rady",
+        "base.radz"
+      ],
+      "help": ""
+    },
+    {
+      "name": "detail",
+      "label": "Detail Level",
+      "kind": "int",
+      "default": 2,
+      "min": 0,
+      "max": 4,
+      "drives": [
+        "smooth.iterations"
+      ],
+      "help": "Each step roughly quadruples polygons \u2014 keep low"
+    },
+    {
+      "name": "roughness",
+      "label": "Roughness",
+      "kind": "float",
+      "default": 1.5,
+      "min": 0,
+      "max": 5,
+      "drives": [
+        "surface_noise.height"
+      ],
+      "help": ""
+    },
+    {
+      "name": "feature_size",
+      "label": "Feature Size",
+      "kind": "float",
+      "default": 0.8,
+      "min": 0.05,
+      "max": 20,
+      "drives": [
+        "surface_noise.elementsize"
+      ],
+      "help": ""
+    },
+    {
+      "name": "tint_r",
+      "label": "Tint Red",
+      "kind": "float",
+      "default": 0.55,
+      "min": 0,
+      "max": 1,
+      "drives": [
+        "tint.colorr"
+      ],
+      "help": ""
+    },
+    {
+      "name": "tint_g",
+      "label": "Tint Green",
+      "kind": "float",
+      "default": 0.3,
+      "min": 0,
+      "max": 1,
+      "drives": [
+        "tint.colorg"
+      ],
+      "help": ""
+    },
+    {
+      "name": "tint_b",
+      "label": "Tint Blue",
+      "kind": "float",
+      "default": 0.18,
+      "min": 0,
+      "max": 1,
+      "drives": [
+        "tint.colorb"
+      ],
+      "help": ""
+    }
+  ],
+  "output": "OUT",
+  "assumptions": [
+    "'craggy' -> roughness x2.5 (now 1.5).",
+    "'large' -> radius x2.5 (now 5).",
+    "Colour word 'rust' -> tint (0.55, 0.3, 0.18).",
+    "Left at recipe defaults (brief did not say): detail, feature_size.",
+    "Recipe chosen: 'Organic blob / asteroid' (keyword score 4; confidence high)."
+  ]
+}
