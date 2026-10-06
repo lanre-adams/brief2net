@@ -290,6 +290,4 @@ where procedural networks are routinely built and adapted for new tasks.
 
 ## Licence
 
-MIT — see [LICENSE](LICENSE).
-
 **Author:** Olanrewaju Adams Agunloye ([LinkedIn](https://www.linkedin.com/in/digitallanre))
